@@ -2,6 +2,8 @@ package console
 
 import (
 	"fmt"
+	"os"
+	"os/signal"
 
 	"github.com/codegangsta/cli"
 	"github.com/etcinit/sauron/eye"
@@ -9,8 +11,9 @@ import (
 
 // MainAction is the main action exceuted when using Sauron.
 func MainAction(c *cli.Context) {
-	directory := "."
+	done := make(chan bool)
 
+	directory := "."
 	if c.Args().First() != "" {
 		directory = c.Args().First()
 	}
@@ -23,4 +26,17 @@ func MainAction(c *cli.Context) {
 
 		return nil
 	})
+
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, os.Interrupt)
+	go func() {
+		for sig := range signalChan {
+			if sig == os.Interrupt || sig == os.Kill {
+				trail.End()
+				done <- true
+			}
+		}
+	}()
+
+	<-done
 }

@@ -22,6 +22,7 @@ type LineHandler func(line Line) error
 type Trail struct {
 	watcher Watcher
 	done    chan bool
+	tails   []*tail.Tail
 }
 
 // NewTrail creates a new instance of a Trail.
@@ -48,16 +49,28 @@ func (t *Trail) Follow(handler LineHandler) error {
 	events := make(chan FileEvent)
 
 	go func() {
-		for event := range events {
-			if event.Op == fsnotify.Create {
-				t.followFile(event.Path, handler, true)
+		for {
+			select {
+			case event := <-events:
+				if event.Op == fsnotify.Create {
+					t.followFile(event.Path, handler, true)
+				}
+			case <-t.done:
+				// Stop the watcher
+				t.watcher.End()
+
+				// Stop any tailers
+				for _, current := range t.tails {
+					current.Stop()
+				}
+
+				// Exit the goroutine
+				return
 			}
 		}
 	}()
 
 	t.watcher.Watch(events)
-
-	<-t.done
 
 	return nil
 }
@@ -69,22 +82,33 @@ func (t *Trail) End() {
 
 func (t *Trail) followFile(path string, handler LineHandler, isNew bool) {
 	go func() {
-		var t *tail.Tail
+		var current *tail.Tail
+		var err error
 
 		if isNew {
-			t, _ = tail.TailFile(path, tail.Config{
+			current, err = tail.TailFile(path, tail.Config{
 				Follow: true,
 				Logger: tail.DiscardingLogger,
 			})
+
+			if err != nil {
+				return
+			}
 		} else {
-			t, _ = tail.TailFile(path, tail.Config{
+			current, err = tail.TailFile(path, tail.Config{
 				Follow:   true,
 				Location: &tail.SeekInfo{Offset: 0, Whence: 2},
 				Logger:   tail.DiscardingLogger,
 			})
+
+			if err != nil {
+				return
+			}
 		}
 
-		for line := range t.Lines {
+		t.tails = append(t.tails, current)
+
+		for line := range current.Lines {
 			newLine := Line{
 				Path: path,
 				Text: line.Text,

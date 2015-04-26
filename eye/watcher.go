@@ -11,6 +11,7 @@ import (
 type Watcher interface {
 	Walk() (paths []string, err error)
 	Watch(newf chan FileEvent) error
+	End()
 }
 
 type DirectoryWatcher struct {
@@ -67,27 +68,28 @@ func (w *DirectoryWatcher) Watch(newf chan FileEvent) error {
 	w.done = make(chan bool)
 
 	go func() {
-		for event := range watcher.Events {
-			abs, err := filepath.Abs(event.Name)
-
-			if err != nil {
-				continue
-			}
-
-			newf <- FileEvent{
-				Name: event.Name,
-				Path: abs,
-				Time: time.Now(),
-				Op:   event.Op,
+		for {
+			select {
+			case event := <-watcher.Events:
+				if abs, err := filepath.Abs(event.Name); err == nil {
+					newf <- FileEvent{
+						Name: event.Name,
+						Path: abs,
+						Time: time.Now(),
+						Op:   event.Op,
+					}
+				}
+			case <-w.done:
+				watcher.Close()
 			}
 		}
 	}()
 
 	watcher.Add(w.path)
 
-	<-w.done
-
-	watcher.Close()
-
 	return nil
+}
+
+func (w *DirectoryWatcher) End() {
+	w.done <- true
 }
