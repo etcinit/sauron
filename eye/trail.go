@@ -15,13 +15,16 @@ type Line struct {
 	Err  error
 }
 
+// LineHandler is a function capable to handle log lines.
 type LineHandler func(line Line) error
 
+// Trail represents a log trail.
 type Trail struct {
 	watcher Watcher
 	done    chan bool
 }
 
+// NewTrail creates a new instance of a Trail.
 func NewTrail(watcher Watcher) *Trail {
 	return &Trail{
 		watcher: watcher,
@@ -57,6 +60,11 @@ func (t *Trail) Follow(handler LineHandler) error {
 	<-t.done
 
 	return nil
+}
+
+// End stops watching.
+func (t *Trail) End() {
+	t.done <- true
 }
 
 func (t *Trail) followFile(path string, handler LineHandler, isNew bool) {

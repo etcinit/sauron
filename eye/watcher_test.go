@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_walk(t *testing.T) {
+func TestWalk(t *testing.T) {
 	watcher := DirectoryWatcher{path: "../_resources/"}
 
 	files, _ := watcher.Walk()
