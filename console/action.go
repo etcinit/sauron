@@ -35,11 +35,15 @@ func MainAction(c *cli.Context) {
 
 	// Create the new instance of the trail and begin following it.
 	trail := eye.NewTrailWithOptions(watcher, options)
-	trail.Follow(func(line eye.Line) error {
+	err := trail.Follow(func(line eye.Line) error {
 		fmt.Println(line.Path, line.Text)
 
 		return nil
 	})
+
+	if err != nil {
+		return
+	}
 
 	// Wait for an interrupt or kill signal.
 	signalChan := make(chan os.Signal, 1)

@@ -75,6 +75,8 @@ func (t *Trail) Follow(handler LineHandler) error {
 	files, err := t.watcher.Walk()
 
 	if err != nil {
+		t.options.Logger.Fatalln("Unable to walk directory")
+
 		return err
 	}
 
