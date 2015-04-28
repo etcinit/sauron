@@ -40,7 +40,19 @@ func MainAction(c *cli.Context) {
 	// Create the new instance of the trail and begin following it.
 	trail := eye.NewTrailWithOptions(watcher, options)
 	err := trail.Follow(func(line eye.Line) error {
-		fmt.Println(line.Path, line.Text)
+		output := ""
+
+		if c.BoolT("prefix-path") {
+			output += "[" + line.Path + "] "
+		}
+
+		if c.Bool("prefix-time") {
+			output += "[" + line.Time.Format("Jan 2, 2006 at 3:04pm (MST)") + "] "
+		}
+
+		output += line.Text
+
+		fmt.Println(output)
 
 		return nil
 	})

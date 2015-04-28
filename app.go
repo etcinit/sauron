@@ -36,7 +36,7 @@ func main() {
 	app.Usage = "Utility for monitoring files in a directory"
 
 	// Set version and authorship info
-	app.Version = "0.0.2"
+	app.Version = "0.0.3"
 	app.Author = "Eduardo Trujillo <ed@chromabits.com>"
 
 	cli.VersionPrinter = func(c *cli.Context) {
@@ -45,7 +45,16 @@ func main() {
 
 	app.Flags = []cli.Flag{
 		cli.BoolFlag{
-			Name: "verbose",
+			Name:  "verbose",
+			Usage: "print verbose output along with logs",
+		},
+		cli.BoolTFlag{
+			Name:  "prefix-path",
+			Usage: "prefix file path to every output line",
+		},
+		cli.BoolFlag{
+			Name:  "prefix-time",
+			Usage: "prefix time to every output line",
 		},
 	}
 
