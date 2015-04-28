@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/Sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	fsnotify "gopkg.in/fsnotify.v1"
 )
@@ -83,9 +84,11 @@ func TestFollowWalkError(t *testing.T) {
 	watcher.On("Walk").Return([]string{}, errors.New("oops"))
 
 	trail := NewTrail(&watcher)
-	trail.Follow(func(line Line) error {
+	err := trail.Follow(func(line Line) error {
 		return nil
 	})
+
+	assert.NotNil(t, err)
 
 	watcher.AssertExpectations(t)
 }

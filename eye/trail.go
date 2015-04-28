@@ -69,13 +69,13 @@ func NewTrailWithOptions(watcher Watcher, options *TrailOptions) *Trail {
 // function could do something as simple as writing the lines that standard
 // output, or do more advanced things like writing to an external log server.
 func (t *Trail) Follow(handler LineHandler) error {
-	t.options.Logger.Println("Sauron is now watching")
+	t.options.Logger.Infoln("Sauron is now watching")
 
 	// First, we tail all the files that we already know.
 	files, err := t.watcher.Walk()
 
 	if err != nil {
-		t.options.Logger.Fatalln("Unable to walk directory")
+		t.options.Logger.Errorln("Sauron is now watching")
 
 		return err
 	}
@@ -93,17 +93,17 @@ func (t *Trail) Follow(handler LineHandler) error {
 			case event := <-events:
 				switch event.Op {
 				case fsnotify.Create:
-					t.options.Logger.Println("Created: " + event.Path)
+					t.options.Logger.Infoln("Created: " + event.Path)
 
 					t.followFile(event.Path, handler, true)
 				case fsnotify.Remove:
-					t.options.Logger.Println("Removed: " + event.Path)
+					t.options.Logger.Infoln("Removed: " + event.Path)
 				case fsnotify.Rename:
-					t.options.Logger.Println("Renamed: " + event.Path)
+					t.options.Logger.Infoln("Renamed: " + event.Path)
 				case fsnotify.Write:
-					t.options.Logger.Println("Write: " + event.Path)
+					t.options.Logger.Infoln("Write: " + event.Path)
 				default:
-					t.options.Logger.Println(
+					t.options.Logger.Infoln(
 						"Event " + strconv.Itoa(int(event.Op)) + ": " + event.Path,
 					)
 				}
@@ -129,7 +129,7 @@ func (t *Trail) Follow(handler LineHandler) error {
 
 // End stops watching.
 func (t *Trail) End() {
-	t.options.Logger.Println("Stopping...")
+	t.options.Logger.Infoln("Stopping...")
 
 	t.done <- true
 }
@@ -139,7 +139,7 @@ func (t *Trail) End() {
 // handler function. The isNew parameter tells the function whether the file
 // was just created or it already existed when the trail started following.
 func (t *Trail) followFile(path string, handler LineHandler, isNew bool) {
-	t.options.Logger.Println("Following: " + path)
+	t.options.Logger.Infoln("Following: " + path)
 
 	go func() {
 		var current *tail.Tail

@@ -3,7 +3,6 @@ package console
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/signal"
 
@@ -30,7 +29,11 @@ func MainAction(c *cli.Context) {
 	if c.Bool("verbose") {
 		options.Logger = logrus.New()
 	} else {
-		options.Logger = log.New(ioutil.Discard, "", 0)
+		log := logrus.New()
+
+		log.Out = ioutil.Discard
+
+		options.Logger = log
 	}
 
 	// Create the new instance of the trail and begin following it.

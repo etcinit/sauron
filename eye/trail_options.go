@@ -1,12 +1,9 @@
 package eye
 
-// SimpleLogger should be able to handle fatal, panic, and info log messages.
-// It is compatible with the standard log package and any other library that
-// mimics its interface.
+// SimpleLogger should be able to handle error and info log messages.
 type SimpleLogger interface {
-	Fatalln(v ...interface{})
-	Panicln(v ...interface{})
-	Println(v ...interface{})
+	Infoln(v ...interface{})
+	Errorln(v ...interface{})
 }
 
 // TrailOptions are the different options supported by the Trail object.
