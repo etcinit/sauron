@@ -36,7 +36,7 @@ func main() {
 	app.Usage = "Utility for monitoring files in a directory"
 
 	// Set version and authorship info
-	app.Version = "0.0.3"
+	app.Version = "0.0.4"
 	app.Author = "Eduardo Trujillo <ed@chromabits.com>"
 
 	cli.VersionPrinter = func(c *cli.Context) {

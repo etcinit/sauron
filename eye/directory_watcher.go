@@ -1,6 +1,7 @@
 package eye
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"time"
@@ -16,10 +17,20 @@ type DirectoryWatcher struct {
 }
 
 // NewDirectoryWatcher creates a new instance of a DirectoryWatcher.
-func NewDirectoryWatcher(path string) *DirectoryWatcher {
+func NewDirectoryWatcher(path string) (*DirectoryWatcher, error) {
+	fileInfo, err := os.Stat(path)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if !fileInfo.IsDir() {
+		return nil, errors.New("Unable to watch. Cannot watch a file.")
+	}
+
 	return &DirectoryWatcher{
 		path: path,
-	}
+	}, nil
 }
 
 // Walk returns a list of all the files within the target directory.

@@ -35,13 +35,17 @@ func (m *MockedWatcher) Watch(newf chan FileEvent) error {
 func (m *MockedWatcher) End() {}
 
 func TestNewTrail(t *testing.T) {
-	watcher := NewDirectoryWatcher("../_resources")
+	watcher, err := NewDirectoryWatcher("../_resources")
+
+	assert.Nil(t, err)
 
 	NewTrail(watcher)
 }
 
 func TestNewTrailWithOptions(t *testing.T) {
-	watcher := NewDirectoryWatcher("../_resources")
+	watcher, err := NewDirectoryWatcher("../_resources")
+
+	assert.Nil(t, err)
 
 	options := &TrailOptions{}
 

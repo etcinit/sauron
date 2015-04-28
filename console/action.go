@@ -16,14 +16,6 @@ import (
 func MainAction(c *cli.Context) {
 	done := make(chan bool)
 
-	// Decide which directory to follow.
-	directory := "."
-	if c.Args().First() != "" {
-		directory = c.Args().First()
-	}
-
-	watcher := eye.NewDirectoryWatcher(directory)
-
 	options := &eye.TrailOptions{}
 
 	// Decide whether to output logs.
@@ -37,9 +29,59 @@ func MainAction(c *cli.Context) {
 		options.Logger = log
 	}
 
-	// Create the new instance of the trail and begin following it.
-	trail := eye.NewTrailWithOptions(watcher, options)
-	err := trail.Follow(func(line eye.Line) error {
+	// Decide which directories to follow.
+	directories := []string{"."}
+	if c.Args().First() != "" {
+		directories = []string{c.Args().First()}
+	}
+
+	// Add any additional directories provided.
+	for _, other := range c.Args().Tail() {
+		directories = append(directories, other)
+	}
+
+	var trails []*eye.Trail
+
+	for _, directory := range directories {
+		watcher, err := eye.NewDirectoryWatcher(directory)
+
+		if err != nil {
+			logrus.Errorln(err)
+			return
+		}
+
+		// Create the new instance of the trail and begin following it.
+		trail := eye.NewTrailWithOptions(watcher, options)
+		err = trail.Follow(getHandler(c))
+
+		if err != nil {
+			logrus.Errorln(err)
+			return
+		}
+
+		trails = append(trails, trail)
+	}
+
+	// Wait for an interrupt or kill signal.
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, os.Interrupt)
+	go func() {
+		for sig := range signalChan {
+			if sig == os.Interrupt || sig == os.Kill {
+				for _, trail := range trails {
+					trail.End()
+				}
+				done <- true
+			}
+		}
+	}()
+
+	<-done
+}
+
+// getHandler builds the handler function to be used while following a trail.
+func getHandler(c *cli.Context) eye.LineHandler {
+	return func(line eye.Line) error {
 		output := ""
 
 		if c.BoolT("prefix-path") {
@@ -55,23 +97,5 @@ func MainAction(c *cli.Context) {
 		fmt.Println(output)
 
 		return nil
-	})
-
-	if err != nil {
-		return
 	}
-
-	// Wait for an interrupt or kill signal.
-	signalChan := make(chan os.Signal, 1)
-	signal.Notify(signalChan, os.Interrupt)
-	go func() {
-		for sig := range signalChan {
-			if sig == os.Interrupt || sig == os.Kill {
-				trail.End()
-				done <- true
-			}
-		}
-	}()
-
-	<-done
 }
