@@ -1,3 +1,24 @@
+// Package Sauron provides tools for monitoring changes on existing and new
+// files inside a directory.
+//
+// After installation, the CLI tool should be available as:
+//
+// 	sauron
+//
+// Running the command without any parameters will cause sauron to watch the
+// current directory for changes. Any new lines appended to any files will be
+// printed out.
+//
+// It is possible to specify which directory to watch:
+//
+// 	sauron /var/log/hhvm
+//
+// For more detailed output, use the verbose option:
+//
+// 	sauron --verbose /var/log/nginx
+//
+// Most of the code for this tool is available as a standalone package,
+// checkout the https://github.com/etcinit/sauron/tree/master/eye package.
 package main
 
 import (

@@ -8,21 +8,21 @@ import (
 	fsnotify "gopkg.in/fsnotify.v1"
 )
 
+// DirectoryWatcher is an implementation of a Watcher capable of monitoring
+// for changes on a directory recursively.
 type DirectoryWatcher struct {
 	path string
 	done chan bool
 }
 
+// NewDirectoryWatcher creates a new instance of a DirectoryWatcher.
 func NewDirectoryWatcher(path string) *DirectoryWatcher {
-	//if string(path[len(path)-1]) != "/" {
-	//	path += "/"
-	//}
-
 	return &DirectoryWatcher{
 		path: path,
 	}
 }
 
+// Walk returns a list of all the files within the target directory.
 func (w *DirectoryWatcher) Walk() (paths []string, err error) {
 	visit := func(path string, f os.FileInfo, err error) error {
 		if f.IsDir() {
@@ -45,6 +45,7 @@ func (w *DirectoryWatcher) Walk() (paths []string, err error) {
 	return
 }
 
+// Watch starts watching for filesystem events.
 func (w *DirectoryWatcher) Watch(newf chan FileEvent) error {
 	watcher, err := fsnotify.NewWatcher()
 
@@ -77,6 +78,7 @@ func (w *DirectoryWatcher) Watch(newf chan FileEvent) error {
 	return nil
 }
 
+// End stops the watching operation.
 func (w *DirectoryWatcher) End() {
 	w.done <- true
 }

@@ -1,3 +1,4 @@
+// Package console contains Sauron's CLI commands.
 package console
 
 import (

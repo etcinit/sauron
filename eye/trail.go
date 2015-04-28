@@ -1,3 +1,4 @@
+// Package eye provides the internals behind the Sauron CLI tool.
 package eye
 
 import (
