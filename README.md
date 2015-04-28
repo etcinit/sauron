@@ -29,9 +29,11 @@ brew tap etcinit/homebrew-etcinit
 # Install
 brew install sauron
 
-# Use
+# Get usage info
 sauron help
 ```
+
+or if you have GOPATH setup:
 
 ```sh
 # Get the package
