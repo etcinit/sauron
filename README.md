@@ -47,3 +47,4 @@ sauron help
 
 - Filter by regex
 - Integrated support for sinks (InfluxDB, ElasticSearch, MySQL, syslogd)
+- Better error reporting
