@@ -1,95 +1,29 @@
 package eye
 
 import (
-	"os"
-	"path/filepath"
 	"time"
 
 	fsnotify "gopkg.in/fsnotify.v1"
 )
 
+// A Watcher is capable of providing a list of the current files and notify
+// about changes in a directory. An implementation might decide whether it
+// supports multiple directory levels (recursive) or just one level. Files also
+// do not need to be in a traditional filesystem.
 type Watcher interface {
 	Walk() (paths []string, err error)
 	Watch(newf chan FileEvent) error
 	End()
 }
 
-type DirectoryWatcher struct {
-	path string
-	done chan bool
-}
-
+// FileEvent represents an event affecting a single file.
 type FileEvent struct {
+	// Name of the file affected.
 	Name string
+	// Path to the file, including the filename.
 	Path string
-	Op   fsnotify.Op
+	// Operation that triggerred the event.
+	Op fsnotify.Op
+	// Time at which the event occured.
 	Time time.Time
-}
-
-func NewDirectoryWatcher(path string) *DirectoryWatcher {
-	//if string(path[len(path)-1]) != "/" {
-	//	path += "/"
-	//}
-
-	return &DirectoryWatcher{
-		path: path,
-	}
-}
-
-func (w *DirectoryWatcher) Walk() (paths []string, err error) {
-	visit := func(path string, f os.FileInfo, err error) error {
-		if f.IsDir() {
-			return nil
-		}
-
-		abs, err := filepath.Abs(path)
-
-		if err != nil {
-			return err
-		}
-
-		paths = append(paths, abs)
-
-		return nil
-	}
-
-	err = filepath.Walk(w.path, visit)
-
-	return
-}
-
-func (w *DirectoryWatcher) Watch(newf chan FileEvent) error {
-	watcher, err := fsnotify.NewWatcher()
-
-	if err != nil {
-		return err
-	}
-
-	w.done = make(chan bool)
-
-	go func() {
-		for {
-			select {
-			case event := <-watcher.Events:
-				if abs, err := filepath.Abs(event.Name); err == nil {
-					newf <- FileEvent{
-						Name: event.Name,
-						Path: abs,
-						Time: time.Now(),
-						Op:   event.Op,
-					}
-				}
-			case <-w.done:
-				watcher.Close()
-			}
-		}
-	}()
-
-	watcher.Add(w.path)
-
-	return nil
-}
-
-func (w *DirectoryWatcher) End() {
-	w.done <- true
 }

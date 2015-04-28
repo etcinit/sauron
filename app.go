@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/codegangsta/cli"
@@ -17,8 +18,12 @@ func main() {
 	app.Version = "0.0.1"
 	app.Author = "Eduardo Trujillo <ed@chromabits.com>"
 
+	cli.VersionPrinter = func(c *cli.Context) {
+		fmt.Fprintf(c.App.Writer, "%v", c.App.Version)
+	}
+
 	app.Flags = []cli.Flag{
-		cli.BoolTFlag{
+		cli.BoolFlag{
 			Name: "verbose",
 		},
 	}

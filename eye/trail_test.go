@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Sirupsen/logrus"
 	"github.com/stretchr/testify/mock"
 	fsnotify "gopkg.in/fsnotify.v1"
 )
@@ -36,6 +37,18 @@ func TestNewTrail(t *testing.T) {
 	watcher := NewDirectoryWatcher("../_resources")
 
 	NewTrail(watcher)
+}
+
+func TestNewTrailWithOptions(t *testing.T) {
+	watcher := NewDirectoryWatcher("../_resources")
+
+	options := &TrailOptions{}
+
+	NewTrailWithOptions(watcher, options)
+
+	options.Logger = logrus.New()
+
+	NewTrailWithOptions(watcher, options)
 }
 
 func TestFollow(t *testing.T) {
