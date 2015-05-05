@@ -16,7 +16,9 @@ import (
 func MainAction(c *cli.Context) {
 	done := make(chan bool)
 
-	options := &eye.TrailOptions{}
+	options := &eye.TrailOptions{
+		PollChanges: c.Bool("poll"),
+	}
 
 	// Decide whether to output logs.
 	if c.Bool("verbose") {

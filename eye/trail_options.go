@@ -11,4 +11,8 @@ type TrailOptions struct {
 	// Logger to be used by the trail. Messages about file events and error
 	// will be sent to this logger. Use ioutil.Discard to ignore output.
 	Logger SimpleLogger
+
+	// PollChanges dictates whether the Trail should continuosly poll for
+	// chastes instead of using fsnotify.
+	PollChanges bool
 }

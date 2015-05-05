@@ -50,7 +50,8 @@ func NewTrail(watcher Watcher) *Trail {
 func NewTrailWithOptions(watcher Watcher, options *TrailOptions) *Trail {
 	// Create a default set of options.
 	defaults := &TrailOptions{
-		Logger: logrus.New(),
+		Logger:      logrus.New(),
+		PollChanges: options.PollChanges,
 	}
 
 	// Replace the logger if an alternative is provided.
@@ -142,6 +143,10 @@ func (t *Trail) End() {
 func (t *Trail) followFile(path string, handler LineHandler, isNew bool) {
 	t.options.Logger.Infoln("Following: " + path)
 
+	if t.options.PollChanges {
+		t.options.Logger.Infoln("Polling enabled")
+	}
+
 	go func() {
 		var current *tail.Tail
 		var err error
@@ -150,6 +155,7 @@ func (t *Trail) followFile(path string, handler LineHandler, isNew bool) {
 			current, err = tail.TailFile(path, tail.Config{
 				Follow: true,
 				Logger: tail.DiscardingLogger,
+				Poll:   t.options.PollChanges,
 			})
 
 			if err != nil {
@@ -160,6 +166,7 @@ func (t *Trail) followFile(path string, handler LineHandler, isNew bool) {
 				Follow:   true,
 				Location: &tail.SeekInfo{Offset: 0, Whence: 2},
 				Logger:   tail.DiscardingLogger,
+				Poll:     t.options.PollChanges,
 			})
 
 			if err != nil {

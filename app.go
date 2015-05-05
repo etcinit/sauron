@@ -36,7 +36,7 @@ func main() {
 	app.Usage = "Utility for monitoring files in a directory"
 
 	// Set version and authorship info
-	app.Version = "0.0.4"
+	app.Version = "0.0.5"
 	app.Author = "Eduardo Trujillo <ed@chromabits.com>"
 
 	cli.VersionPrinter = func(c *cli.Context) {
@@ -55,6 +55,10 @@ func main() {
 		cli.BoolFlag{
 			Name:  "prefix-time",
 			Usage: "prefix time to every output line",
+		},
+		cli.BoolFlag{
+			Name:  "poll",
+			Usage: "poll for changes instead of using fsnotify (for tailing)",
 		},
 	}
 
